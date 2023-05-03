@@ -4,14 +4,16 @@ export type Issue = {
   title: string;
   created_at: string;
   user: { login: string };
+  login: string;
   comments: number;
   id: string;
   number: number;
   state: string;
   closed_at: string;
+  assignee: string;
 };
 
-type Column = {
+export type Column = {
   name: string;
   items: Issue[];
 };
@@ -35,6 +37,8 @@ type UrlInfo = {
 export interface UserState {
   filteredInfo: Columns;
   urlInfo: BaseInfo;
+  reqName: string;
+  error: string;
 }
 
 export interface UsersListAction {
@@ -47,4 +51,22 @@ export interface UrlInfoAction {
   payload: { data: BaseInfo };
 }
 
-export type ALLActions = UsersListAction | UrlInfoAction;
+export interface RequestNameAction {
+  type: UserActionTypes.REQUEST_NAME;
+  payload: {
+    name: string;
+  };
+}
+
+export interface BadRequestAction {
+  type: UserActionTypes.BAD_REQUEST;
+  payload: {
+    status: string;
+  };
+}
+
+export type ALLActions =
+  | UsersListAction
+  | UrlInfoAction
+  | RequestNameAction
+  | BadRequestAction;

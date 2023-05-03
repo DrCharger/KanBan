@@ -17,6 +17,8 @@ const initialState: UserState = {
     },
   },
   urlInfo: { owner: { name: "", url: "" }, repo: { name: "", url: "" } },
+  reqName: "",
+  error: "",
 };
 
 const usersReducer = (state = initialState, action: ALLActions): UserState => {
@@ -30,6 +32,16 @@ const usersReducer = (state = initialState, action: ALLActions): UserState => {
       return {
         ...state,
         urlInfo: action.payload.data,
+      };
+    case UserActionTypes.REQUEST_NAME:
+      return {
+        ...state,
+        reqName: action.payload.name,
+      };
+    case UserActionTypes.BAD_REQUEST:
+      return {
+        ...state,
+        error: action.payload.status,
       };
     default:
       return state;
