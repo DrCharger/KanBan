@@ -52,7 +52,7 @@ const Header: React.FC<HeaderTypes> = ({
     } else {
       getUsersList(reqName, quantity);
     }
-  }, [answer]);
+  }, [answer, getUsersList, quantity, reqName, setCorrectColumns]);
 
   const handleClose = () => {
     setBadRequest("");
