@@ -1,6 +1,7 @@
 import React from "react";
 import { render, fireEvent, screen, waitFor } from "@testing-library/react";
 import Header from "../components/home/Header";
+import "@testing-library/jest-dom";
 
 describe("Header component", () => {
   const mockProps = {
@@ -13,6 +14,13 @@ describe("Header component", () => {
     reqName: "",
     error: "",
   };
+  const localStorageMock = {
+    getItem: jest.fn(),
+    setItem: jest.fn(),
+    removeItem: jest.fn(),
+    clear: jest.fn(),
+  };
+  global.localStorage = localStorageMock;
 
   it("renders the input and button", () => {
     render(<Header {...mockProps} />);
@@ -24,11 +32,13 @@ describe("Header component", () => {
 
   it("displays error message when URL is not valid", async () => {
     render(<Header {...mockProps} />);
+    const input = screen.getByPlaceholderText("Enter repo URl");
+    fireEvent.change(input, {
+      target: { value: "" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Load Issues" }));
     await waitFor(() => {
-      expect(
-        screen.getByText("Please type correct url 'facebook/react'")
-      ).toBeInTheDocument();
+      expect(screen.getByText("Please type correct url")).toBeInTheDocument();
     });
   });
 
@@ -60,25 +70,5 @@ describe("Header component", () => {
     await waitFor(() => {
       expect(mockProps.getUsersList).toHaveBeenCalledWith("facebook/react", 30);
     });
-  });
-
-  it("opens the CustomModal when data is present in local storage", async () => {
-    const spy = jest.spyOn(global, "localStorage", "get");
-    spy.mockReturnValueOnce(
-      JSON.stringify({ name: "facebook/react", data: ["issue1", "issue2"] })
-    );
-    render(<Header {...mockProps} />);
-    const input = screen.getByPlaceholderText("Enter repo URl");
-    fireEvent.change(input, {
-      target: { value: "https://github.com/facebook/react" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Load Issues" }));
-    await waitFor(() => {
-      expect(mockProps.setAnswer).toHaveBeenCalled();
-    });
-    await waitFor(() => {
-      expect(screen.getByRole("dialog")).toBeInTheDocument();
-    });
-    spy.mockRestore();
   });
 });

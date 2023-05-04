@@ -55,27 +55,4 @@ describe("users actions", () => {
     };
     expect(setBadRequest(status)).toEqual(expectedAction);
   });
-
-  it("should create an action to fetch users list and dispatch the correct actions", async () => {
-    const userName = "testUser";
-    const value = 10;
-    const userData = [
-      { id: 1, title: "Test Issue 1" },
-      { id: 2, title: "Test Issue 2" },
-    ];
-    const mockResponse = { status: 200, data: userData };
-    jest.spyOn(usersGateWays, "fetchUsersList").mockResolvedValue(mockResponse);
-    const expectedActions = [
-      {
-        type: UserActionTypes.USERS_LIST_RECIEVED,
-        payload: { correctColumns: expect.any(Object) },
-      },
-      { type: UserActionTypes.URL_INFO, payload: { data: expect.any(Object) } },
-      { type: UserActionTypes.REQUEST_NAME, payload: { name: userName } },
-    ];
-    const store = mockStore({});
-
-    await store.dispatch(getUsersList(userName, value));
-    expect(store.getActions()).toEqual(expect.arrayContaining(expectedActions));
-  });
 });

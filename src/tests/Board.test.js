@@ -1,67 +1,79 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import React from "react";
+import { render, fireEvent } from "@testing-library/react";
 import Board from "../components/Board";
+import { DragDropContext } from "react-beautiful-dnd";
+import { onDragEnd } from "../utilits/onDradEnd";
+import { setDataToLocalStore } from "../usersStore/users.gateWays";
+import "@testing-library/jest-dom";
 
-describe("Board", () => {
-  const items = {
-    column1: {
-      name: "Column 1",
-      items: [
-        {
-          id: 1,
-          title: "Issue 1",
-          number: 123,
-          state: "open",
-          created_at: "2022-05-01T10:00:00Z",
-          closed_at: null,
-          login: "user1",
-          comments: 3,
-        },
-        {
-          id: 2,
-          title: "Issue 2",
-          number: 124,
-          state: "closed",
-          created_at: "2022-04-01T10:00:00Z",
-          closed_at: "2022-04-10T10:00:00Z",
-          login: "user2",
-          comments: 2,
-        },
-      ],
-    },
-    column2: {
-      name: "Column 2",
-      items: [],
-    },
-  };
+jest.mock("../utilits/onDradEnd");
+jest.mock("../usersStore/users.gateWays");
 
-  it("should render board with correct columns and items", () => {
-    render(<Board items={items} reqName={"test"} />);
-    const column1Title = screen.getByText("Column 1");
-    const column2Title = screen.getByText("Column 2");
-    expect(column1Title).toBeInTheDocument();
-    expect(column2Title).toBeInTheDocument();
-    const issue1Title = screen.getByText("Issue 1");
-    const issue2Title = screen.getByText("Issue 2");
-    expect(issue1Title).toBeInTheDocument();
-    expect(issue2Title).toBeInTheDocument();
+describe("Board component", () => {
+  let props;
+  let setColumnsMock;
+
+  beforeEach(() => {
+    setColumnsMock = jest.fn();
+    props = {
+      items: {
+        todo: {
+          name: "To do",
+          items: [{ id: 1, title: "Item 1" }],
+        },
+        progress: {
+          name: "In Progress",
+          items: [{ id: 2, title: "Item 2" }],
+        },
+        done: {
+          name: "Done",
+          items: [{ id: 3, title: "Item 3" }],
+        },
+      },
+      reqName: "test",
+    };
   });
 
-  it("should render no items if column is empty", () => {
-    render(<Board items={items} reqName={"test"} />);
-    const column2Title = screen.getByText("Column 2");
-    expect(column2Title).toBeInTheDocument();
-    const noItemsMessage = screen.queryByText("No items in this column");
-    expect(noItemsMessage).toBeInTheDocument();
+  it("should render a board with all columns and items", () => {
+    const { getByText } = render(
+      <DragDropContext
+        onDragEnd={(result) =>
+          onDragEnd(result, props.items, props.reqName, setColumnsMock)
+        }
+      >
+        <Board {...props} />
+      </DragDropContext>
+    );
+
+    expect(getByText("To do")).toBeInTheDocument();
+    expect(getByText("In Progress")).toBeInTheDocument();
+    expect(getByText("Done")).toBeInTheDocument();
+
+    expect(getByText("Item 1")).toBeInTheDocument();
+    expect(getByText("Item 2")).toBeInTheDocument();
+    expect(getByText("Item 3")).toBeInTheDocument();
   });
 
-  it("should show full title on hover", () => {
-    render(<Board items={items} reqName={"test"} />);
-    const issue1Title = screen.getByText("Issue 1");
-    expect(issue1Title).toBeInTheDocument();
-    expect(issue1Title).not.toHaveClass("tooltip");
-    fireEvent.mouseEnter(issue1Title);
-    const fullTitle = screen.getByText("Issue 1");
-    expect(fullTitle).toBeInTheDocument();
-    expect(fullTitle).toHaveClass("tooltip");
+  it("should update state and local storage on item drag and drop", () => {
+    const { getByTestId } = render(
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Board {...props} />
+      </DragDropContext>
+    );
+
+    const draggableItem = getByTestId("draggable-item-1");
+    const droppableColumn = getByTestId("droppable-column-Done");
+
+    fireEvent.dragStart(draggableItem);
+    fireEvent.dragEnter(droppableColumn);
+    fireEvent.dragOver(droppableColumn);
+    fireEvent.drop(droppableColumn);
+    fireEvent.dragEnd(draggableItem);
+
+    expect(setDataToLocalStore).toHaveBeenCalledTimes(1);
+    expect(setDataToLocalStore).toHaveBeenCalledWith(
+      props.reqName,
+      expect.any(Object)
+    );
   });
 });

@@ -29,6 +29,7 @@ const Board: React.FC<BoardProps> = ({ items, reqName }) => {
                         back={snapshot.isDraggingOver}
                         {...provided.droppableProps}
                         ref={provided.innerRef}
+                        data-testid={`droppable-column-${column.name}`}
                       >
                         {column.items.map((item, index) => {
                           if (column.items.length === 0) return null;
@@ -48,6 +49,7 @@ const Board: React.FC<BoardProps> = ({ items, reqName }) => {
                                     draggableStyle={{
                                       ...provided.draggableProps.style,
                                     }}
+                                    data-testid={`draggable-item-${item.id}`}
                                   >
                                     <Card item={item} />
                                   </Issue>

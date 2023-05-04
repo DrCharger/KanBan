@@ -28,9 +28,6 @@ const Header: React.FC<HeaderTypes> = ({
   const [validated, setValidated] = useState(false);
   const [answer, setAnswer] = useState<boolean | "">("");
   const { owner, repo } = urlInfo;
-
-  console.log(error);
-
   const findIssue = () => {
     if (!value) return setValidated(true);
     const { result, fullname } = correctUrl(value);

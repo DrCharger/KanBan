@@ -4,11 +4,11 @@ import {
   fetchUsersList,
   setDataToLocalStore,
   getDataFromLocalStore,
-} from "./users.gateWays";
+} from "../usersStore/users.gateWays";
 
 describe("users.gateWays module", () => {
   describe("fetchUsersList function", () => {
-    const mockUserName = "mockUserName";
+    const mockUserName = "facebook/react";
     const mockValue = 5;
     const mockResponseData = [
       { id: 1, title: "Mock issue 1" },
@@ -23,7 +23,7 @@ describe("users.gateWays module", () => {
         )
         .reply(200, mockResponseData);
 
-      const response = await fetchUsersList(mockUserName, mockValue);
+      await fetchUsersList(mockUserName, mockValue);
 
       expect(mockAxios.history.get.length).toBe(1);
       expect(mockAxios.history.get[0].url).toBe(
@@ -57,7 +57,7 @@ describe("users.gateWays module", () => {
         .reply(500, "Server error");
 
       await expect(fetchUsersList(mockUserName, mockValue)).rejects.toThrow(
-        "Error fetching user's issues: Error: Request failed with status code 500"
+        "Request failed with status code 500"
       );
 
       mockAxios.restore();

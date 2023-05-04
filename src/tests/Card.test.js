@@ -1,25 +1,55 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
-import "@testing-library/jest-dom/extend-expect";
+import { render, fireEvent } from "@testing-library/react";
+import "@testing-library/jest-dom";
 import Card from "../components/Card";
 
-const testIssue = {
-  title: "Test Issue",
-  number: 123,
-  state: "open",
-  created_at: "2021-05-01T12:00:00Z",
-  closed_at: null,
-  login: "testuser",
-  comments: 2,
-};
-
 describe("Card", () => {
+  const testIssue = {
+    title: "Test Issue Title",
+    number: 1,
+    state: "open",
+    created_at: "2022-05-01T00:00:00Z",
+    closed_at: null,
+    login: "testuser",
+    comments: 5,
+  };
+
   it("renders card content correctly", () => {
-    render(<Card item={testIssue} />);
-    expect(screen.getByText(testIssue.title)).toBeInTheDocument();
+    const { getByText } = render(<Card item={testIssue} />);
+    expect(getByText(testIssue.title)).toBeInTheDocument();
     expect(
-      screen.getByText(`#${testIssue.number} ${testIssue.state}`)
+      getByText(`#${testIssue.number} ${testIssue.state}`)
     ).toBeInTheDocument();
-    expect(screen.getByText(`testuser | Comments: 2`)).toBeInTheDocument();
+    expect(
+      getByText(`${testIssue.login} | Comments: ${testIssue.comments}`)
+    ).toBeInTheDocument();
+  });
+
+  it("shows correct state text", () => {
+    const { getByText } = render(<Card item={testIssue} />);
+
+    expect(getByText(`opened a year ago`)).toBeInTheDocument();
+
+    const closedIssue = {
+      ...testIssue,
+      state: "closed",
+      closed_at: "2022-05-03T00:00:00Z",
+    };
+    render(<Card item={closedIssue} />);
+    expect(getByText(`closed a year ago`)).toBeInTheDocument();
+  });
+
+  it("shows title when hovered", () => {
+    const { getByText, queryByText } = render(<Card item={testIssue} />);
+    expect(queryByText(testIssue.title)).toBeInTheDocument();
+    fireEvent.mouseEnter(getByText(testIssue.title));
+    expect(getByText(testIssue.title)).toHaveStyle({
+      "white-space": "wrap",
+    });
+
+    fireEvent.mouseLeave(getByText(testIssue.title));
+    expect(queryByText(testIssue.title)).toHaveStyle({
+      "white-space": "nowrap",
+    });
   });
 });
